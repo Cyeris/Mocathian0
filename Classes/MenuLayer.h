@@ -14,10 +14,13 @@ public:
 	virtual bool init();
 	void menuCloseCallback(Ref * pSender);
 	void exitCallback(Ref * pSender);
-	void showMenu(bool show, GameLayer* gL);
+	void showMenu(bool show, GameLayer* gL, Vec2 cam);
 	CREATE_FUNC(MenuLayer);
 	bool escOn;
 	GameLayer* pGameLayer;
+	Vec2 camPos;
+	Vec2 mocaPos;
+	//static Scene* createScene(RenderTexture* sqr);
 };
 
 #endif

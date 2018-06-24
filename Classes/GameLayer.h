@@ -9,34 +9,47 @@
 USING_NS_CC;
 extern Size visibleSize;
 extern Vec2 origin;
-//class GameScene;
+//extern std::string savedata;
+
 class Moca;
+class Moguru;
 class MenuLayer;
 class Dialog;
 
 class GameLayer : public cocos2d::Layer
 {
 public:
+	//friend MenuLayer;
 	Moca * _moca;
 	virtual bool init();
 	void update(float delta);
-	void setViewPoint(const Point & point);
+	void setViewPoint();
 	void onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event);
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event * event);
+	void checkForAndResolveCollisions(Moca* player);
+	CREATE_FUNC(GameLayer);
+
+	bool eventMeetMoguru();
+
+
+
+
+
+
 	Vec2 tilePosition(Vec2 position);
 	Rect getTileRect(Vec2 tilePos);
-	//CCPoint TileCoordForPosition(CCPoint position);
-	Rect intersectsRect(Rect rectA, Rect rectB);
-	//Rect tileRect(cocos2d::CCPoint tileCoords);
-	CCArray* getSurroundingTilesAtPosition(Vec2 position, TMXLayer* layer);
-	void GameLayer::checkForAndResolveCollisions(Moca* player);
-	CREATE_FUNC(GameLayer);
 	TMXTiledMap * map1;
 	Dialog* dia;
 	MenuLayer* menuL;
 	TMXLayer * _clouds;
-	//bool escOn;
-	
+	Slider* heightBar;
+	Camera* camera;
+	Moguru* _moguru;
+
+	//CCPoint TileCoordForPosition(CCPoint position);
+	//Rect intersectsRect(Rect rectA, Rect rectB);
+	//Rect tileRect(cocos2d::CCPoint tileCoords);
+	//CCArray* getSurroundingTilesAtPosition(Vec2 position, TMXLayer* layer);
 };
 
 
