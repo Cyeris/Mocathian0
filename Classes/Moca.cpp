@@ -104,6 +104,7 @@ void Moca::update(float dt)
 
 bool Moguru::init()
 {
+	isparty = 0;
 	moguru = Sprite::create("image/moguru/32IMG00000.png");
 	moguru->setAnchorPoint(Vec2(0.5, 0));
 	this->addChild(moguru);

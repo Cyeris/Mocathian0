@@ -33,7 +33,7 @@ public:
 
 
 
-
+	bool flagMeetMoguru;
 
 
 	Vec2 tilePosition(Vec2 position);
@@ -45,7 +45,7 @@ public:
 	Slider* heightBar;
 	Camera* camera;
 	Moguru* _moguru;
-
+	Layer* followCamera;
 	//CCPoint TileCoordForPosition(CCPoint position);
 	//Rect intersectsRect(Rect rectA, Rect rectB);
 	//Rect tileRect(cocos2d::CCPoint tileCoords);

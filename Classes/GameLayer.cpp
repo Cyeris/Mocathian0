@@ -3,13 +3,11 @@
 #include "option.h"
 #include "MenuLayer.h"
 
-//#include <iostream>
-//enum { right1, left1, right0, left0, jump0, jump1, jump2, f0 };
+#include <iostream>
 float tTime = 0;
 bool GameLayer::init()
 {
 	vector<Sprite*> danmaku1;
-
 
 	/*auto diabox = Sprite::create("mocaDialog.png");
 	diabox->setPosition(origin.x, origin.y);
@@ -33,6 +31,9 @@ bool GameLayer::init()
 	_moguru = Moguru::create();
 	_moguru->setPosition(715, 2544);
 	this->addChild(_moguru, 1);
+	/*follow层*/
+	followCamera = Layer::create();
+	this->addChild(followCamera, 1);
 
 	/*高度条*/
 	heightBar = Slider::create();
@@ -40,9 +41,14 @@ bool GameLayer::init()
 	heightBar->loadSlidBallTextures("sliderThumb.png", "sliderThumb.png", "sliderThumb.png");
 	heightBar->loadProgressBarTexture("sliderProgress.png");
 	heightBar->setRotation(-90);
-	heightBar->setPosition(Vec2(100,50));
-	this->addChild(heightBar, 1);
+	heightBar->setPosition(Vec2(32-0.5*visibleSize.width,160 - 0.5*visibleSize.height));
+	followCamera->addChild(heightBar, 1);
 	
+	/*对话框*/
+	dia = Dialog::create();
+	dia->shesay(0, "meet",3);
+	followCamera->addChild(dia, 2);
+
 	/*菜单*/
 	menuL = MenuLayer::create();
 	this->addChild(menuL, 2);
@@ -60,16 +66,25 @@ bool GameLayer::init()
 }
 void GameLayer::update(float delta)
 {
+	/*std::string test = "你好";
+	std::cout << test;*/
 	tTime += delta;
 	//log("%f", tTime);
 	_moca->update(delta);
 	//tilePosition(_moca->getPosition());
 	checkForAndResolveCollisions(_moca);
 	setViewPoint();
-	heightBar->setPosition(Vec2(camera->getPosition().x - 0.48*visibleSize.width, camera->getPosition().y - 0.32*visibleSize.height));
+	//heightBar->setPosition(Vec2(camera->getPosition().x - 0.48*visibleSize.width, camera->getPosition().y - 0.32*visibleSize.height));
 	heightBar->setPercent(100*_moca->getPosition().y / 7680);
 	menuL->setPosition(Vec2(camera->getPosition().x, camera->getPosition().y + 1.5*visibleSize.height));
-	log("%f %f", _moca->getPosition().x, _moca->getPosition().y);
+	followCamera->setPosition(camera->getPosition());
+	//log("%f %f", _moca->getPosition().x, _moca->getPosition().y);
+
+	if (!_moguru->isparty&&_moca->jumpCount==0&&_moca->getPosition().y>=2544)
+	{
+		dia->shesay(1, "meet1", 7);
+
+	}
 }
 void GameLayer::setViewPoint()
 {
@@ -83,6 +98,9 @@ void GameLayer::setViewPoint()
 void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {	
 	switch (keyCode)
 	{
+	/*case EventKeyboard::KeyCode::KEY_ENTER:
+		dia->shesay(0, "meet1");
+		break;*/
 	case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		if (_moca->flyMode)
 		{
@@ -90,15 +108,11 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		}
 		else
 		{
-			/*if (_moca->state == left0 || _moca->state == left1)
-			{
-				_moca->setScaleX(1);
-			}
-			_moca->state = right1;*/
-			if (_moca->lefting)
+			
+			/*if (_moca->lefting)
 			{
 				_moca->lefting = 0;
-			}
+			}*/
 			_moca->setScaleX(1);
 			_moca->righting = 1;
 		}
@@ -110,7 +124,7 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		}
 		else
 		{
-			if (_moca->righting) _moca->righting = 0;
+			//if (_moca->righting) _moca->righting = 0;
 			_moca->setScaleX(-1);
 			_moca->lefting=1;
 		}
@@ -122,19 +136,27 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		if (_moca->flyMode) _moca->isS = 1;
 		break;
 	case EventKeyboard::KeyCode::KEY_Z:
-		switch (_moca->jumpCount)
+		if (dia->showing)
 		{
-		case 0:
-			_moca->speed.y += 440;
-			_moca->jumpCount = 1;
-			break;
-		case 1:
-			_moca->speed.y += 480;
-			_moca->jumpCount = 2;
-			break;
-		case 2:
-			break;
+			dia->next();
 		}
+		else
+		{
+			switch (_moca->jumpCount)
+			{
+			case 0:
+				_moca->speed.y += 440;
+				_moca->jumpCount = 1;
+				break;
+			case 1:
+				_moca->speed.y += 480;
+				_moca->jumpCount = 2;
+				break;
+			case 2:
+				break;
+			}
+		}
+		
 		break;
 	case EventKeyboard::KeyCode::KEY_ESCAPE:
 		if (!menuL->escOn)

@@ -103,7 +103,7 @@ void MainScene::startGame(Ref* pSender) {
 	//SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.ogg");
 	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 	UserDefault::getInstance()->setFloatForKey("x", 280);
-	UserDefault::getInstance()->setFloatForKey("y", 626);
+	UserDefault::getInstance()->setFloatForKey("y", 640);
 	auto scene = GameScene::create();
 	TransitionScene *transition = TransitionFade::create(1, scene);
 	Director::getInstance()->replaceScene(transition);
