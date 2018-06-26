@@ -24,7 +24,7 @@ bool GameLayer::init()
 	float inity = UserDefault::getInstance()->getFloatForKey("y");
 	_moca->setPosition(initx, inity);
 
-	//_moca->enableFly();
+	_moca->enableFly();
 	this->addChild(_moca, 1);
 
 	/*添加Moguru*/
@@ -46,9 +46,8 @@ bool GameLayer::init()
 	
 	/*对话框*/
 	dia = Dialog::create();
-	dia->shesay(0, "meet",3);
 	followCamera->addChild(dia, 2);
-
+	//eventMeetMoguru();
 	/*菜单*/
 	menuL = MenuLayer::create();
 	this->addChild(menuL, 2);
@@ -82,8 +81,7 @@ void GameLayer::update(float delta)
 
 	if (!_moguru->isparty&&_moca->jumpCount==0&&_moca->getPosition().y>=2544)
 	{
-		dia->shesay(1, "meet1", 7);
-
+		eventMeetMoguru();
 	}
 }
 void GameLayer::setViewPoint()
@@ -98,9 +96,6 @@ void GameLayer::setViewPoint()
 void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {	
 	switch (keyCode)
 	{
-	/*case EventKeyboard::KeyCode::KEY_ENTER:
-		dia->shesay(0, "meet1");
-		break;*/
 	case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		if (_moca->flyMode)
 		{
@@ -138,6 +133,10 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 	case EventKeyboard::KeyCode::KEY_Z:
 		if (dia->showing)
 		{
+			if (dia->turned==dia->turns)
+			{
+				scheduleUpdate();
+			}
 			dia->next();
 		}
 		else
@@ -301,12 +300,8 @@ void GameLayer::checkForAndResolveCollisions(Moca* player)
 bool GameLayer::eventMeetMoguru()
 {
 	unscheduleUpdate();
-
-
-
-
-
-	scheduleUpdate();
+	dia->shesay("meet", 3);
+	_moguru->isparty = 1;
 	return true;
 }
 

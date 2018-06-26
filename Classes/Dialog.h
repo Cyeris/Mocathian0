@@ -9,13 +9,14 @@ class Dialog : public cocos2d::Layer
 public:
 	virtual bool init();
 	CREATE_FUNC(Dialog);
-	bool shesay(int who, std::string name, int count = 0);
+	bool shesay(std::string name="", int count = 0);
 	void next();
 
 	bool showing;
 
 	int turns;
 	int turned;
+	std::string nameNow;
 	Label* text;
 	FadeTo* showDia;
 	FadeOut* disDia;
@@ -25,7 +26,7 @@ public:
 	Sprite* moguruDialog;
 	Sprite* fyeDialog;
 
-	Dictionary* kaiwa;
+	__Dictionary* kaiwa;
 };
 
 #endif

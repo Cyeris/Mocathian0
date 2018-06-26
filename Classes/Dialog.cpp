@@ -31,12 +31,9 @@ bool Dialog::init()
 	moguruDialog->setPosition(0, -0.5*visibleSize.height);
 	fyeDialog->setPosition(0, -0.5*visibleSize.height);
 
-	mocaDialog->setOpacity(128);
+	mocaDialog->setOpacity(0);
 	moguruDialog->setOpacity(0);
 	fyeDialog->setOpacity(0);
-
-	/*text = Label::createWithTTF("Your Text", "fonts/PingFangLight.ttf", 24);
-	this->addChild(text);*/
 
 	kaiwa = Dictionary::createWithContentsOfFile("kaiwa.xml");
 
@@ -48,70 +45,78 @@ bool Dialog::init()
 	return true;
 }
 
-bool Dialog::shesay(int who, std::string name,int count)
+bool Dialog::shesay(std::string name,int count)
 {
-	//int length = name.size();
-	//log("len=%d", length);
-
-	
-	if (!count)
+	if (count!=0)
 	{
 		turns = count;
+		showing = 1;
+		nameNow = name;
 	}
-	std::string fullname = name + std::to_string(turned);
+	std::string fullname = nameNow + std::to_string(turned);
 	
-	
+	log("%s", fullname.c_str());
 	//std::cout << fullname;
+	//std::string str = ((__String *)kaiwa->objectForKey(fullname))->getCString();
+	std::string str = ((__String *)Dictionary::createWithContentsOfFile("kaiwa.xml")->objectForKey(fullname))->getCString();
 
-	//const char * str = ((String *)kaiwa->objectForKey(fullname))->getCString();
-	std::string str = ((String *)kaiwa->objectForKey(fullname))->getCString();
 	char whose = str[str.size() - 1];
 	str.pop_back();
-	//log("%c", whose);
 	text = Label::createWithTTF(str, "fonts/PingFangLight.ttf", 26);
 	this->addChild(text, 2);
+	text->setPosition(0, -0.3*visibleSize.height);
 	switch (whose)
 	{
 	case '0'://moca
-		//mocaDialog->runAction(showDia);
+		if (count != 0) { mocaDialog->runAction(FadeTo::create(1.0f, 255)); }
+		else
+		{
+			mocaDialog->setOpacity(255);
+			moguruDialog->setOpacity(0);
+			fyeDialog->setOpacity(0);
+		}
 		log("isMoca");
 		break;
 	case '1'://moguru
+		if (count != 0) {moguruDialog->runAction(FadeTo::create(1.0f, 255));}
+		else
+		{
+			mocaDialog->setOpacity(0);
+			moguruDialog->setOpacity(255);
+			fyeDialog->setOpacity(0);
+		}
 		log("isMoguru");
 		break;
 	case '2'://fye
+		if (count != 0) { fyeDialog->runAction(FadeTo::create(1.0f, 255)); }
+		else
+		{
+			mocaDialog->setOpacity(0);
+			moguruDialog->setOpacity(0);
+			fyeDialog->setOpacity(255);
+		}
 		break;
 	}
 	
 	return true;
 }
-//bool Dialog::shesay(int who, const char* name, int count = 0)
-//{
-//
-//	if (!count)
-//	{
-//		turns = count;
-//
-//	}
-//	const char * str = ((String *)kaiwa->objectForKey(name))->getCString();
-//	text = Label::createWithTTF(str, "fonts/PingFangLight.ttf", 26);
-//	this->addChild(text, 2);
-//	switch (who)
-//	{
-//	case 0://moca
-//		mocaDialog->runAction(showDia);
-//		break;
-//	case 1://moguru
-//		break;
-//	case 2://fye
-//		break;
-//	}
-//
-//	return true;
-//}
 
 void Dialog::next()
 {
-
-	turned++;
+	if (turned<turns)
+	{
+		turned++;
+		text->removeFromParentAndCleanup(1);
+		shesay();
+	}
+	else
+	{
+		turned = 1;
+		turns = 0;
+		mocaDialog->setOpacity(0);
+		moguruDialog->setOpacity(0);
+		fyeDialog->setOpacity(0);
+		text->removeFromParentAndCleanup(1);
+		showing = 0;
+	}
 }
