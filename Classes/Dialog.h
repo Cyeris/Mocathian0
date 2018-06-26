@@ -14,6 +14,10 @@ public:
 
 	bool showing;
 
+	bool mocaOn;
+	bool moguruOn;
+	bool fyeOn;
+
 	int turns;
 	int turned;
 	std::string nameNow;
@@ -21,6 +25,9 @@ public:
 	FadeTo* showDia;
 	FadeOut* disDia;
 
+	Sprite* dmoca;
+	Sprite* dmoguru;
+	Sprite* dfye;
 
 	Sprite* mocaDialog;
 	Sprite* moguruDialog;

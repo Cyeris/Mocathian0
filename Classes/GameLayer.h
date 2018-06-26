@@ -31,6 +31,10 @@ public:
 
 	bool eventMeetMoguru();
 
+	void randomGhost();
+
+	void ghostAtk();
+
 
 
 	bool flagMeetMoguru;
@@ -46,6 +50,7 @@ public:
 	Camera* camera;
 	Moguru* _moguru;
 	Layer* followCamera;
+	
 	//CCPoint TileCoordForPosition(CCPoint position);
 	//Rect intersectsRect(Rect rectA, Rect rectB);
 	//Rect tileRect(cocos2d::CCPoint tileCoords);

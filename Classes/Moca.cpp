@@ -105,7 +105,7 @@ void Moca::update(float dt)
 bool Moguru::init()
 {
 	isparty = 0;
-	moguru = Sprite::create("image/moguru/32IMG00000.png");
+	moguru = Sprite::create("image/moguru/moguru0.png");
 	moguru->setAnchorPoint(Vec2(0.5, 0));
 	this->addChild(moguru);
 
@@ -113,9 +113,25 @@ bool Moguru::init()
 
 	return true;
 }
+bool Ghost::init()
+{
+	ghost = Sprite::create("Ghost.png");
+	ghost->setScale(2.0f);
+	this->addChild(ghost);
 
-//void Moguru::follow()
-//{
-//
-//
-//}
+	return true;
+}
+
+void Ghost::update(Moca * moca,float dt)
+{
+	if (moca->faceLeft)
+	{
+		if (this->getPosition().x>moca->getPosition().x)
+		{
+
+		}
+	}
+
+
+}
+

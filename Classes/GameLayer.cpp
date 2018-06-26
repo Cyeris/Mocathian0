@@ -304,7 +304,12 @@ bool GameLayer::eventMeetMoguru()
 	_moguru->isparty = 1;
 	return true;
 }
+void GameLayer::randomGhost() {
 
+}
+void GameLayer::ghostAtk() {
+
+}
 //Rect GameLayer::intersectsRect(Rect rectA, Rect rectB)
 //
 //{

@@ -52,13 +52,21 @@ public:
 	CREATE_FUNC(Moguru);
 	virtual bool init();
 	//Rect getBox();
-	//void follow();
 	std::queue<Vec2> actlog;
 	bool isparty;
 };
+class Ghost :public Sprite {
+public:
+	Sprite * ghost;
 
+	CREATE_FUNC(Ghost);
+	virtual bool init();
+	void update(Moca* moca,float dt);
+	//Rect getBox();
+	std::queue<Vec2> actlog;
+	bool isparty;
 
-
+};
 
 #endif
 

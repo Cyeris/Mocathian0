@@ -12,10 +12,22 @@ bool Dialog::init()
 	}
 	this->setCascadeOpacityEnabled(true);
 	turned = 1;
+	mocaOn = 0;
+	moguruOn = 0;
+	fyeOn;
+
 	//showDia = FadeIn::create(0.5f);
 	showDia = FadeTo::create(2.0f, 255);
 	disDia = FadeOut::create(0.5f);
 
+	dmoca = Sprite::create("Mocatachie.png");
+	dmoguru = Sprite::create("Mocatachie.png");
+	dfye = Sprite::create("Mocatachie.png");
+	this->addChild(dmoca);
+	dmoca->setAnchorPoint(Vec2(0, 0));
+	dmoca->setScale(3.0f);
+	dmoca->setPosition(-0.5*visibleSize.width, -0.5*visibleSize.height);
+	dmoca->setOpacity(0);
 
 	mocaDialog = Sprite::create("mocaDialog.png");
 	moguruDialog= Sprite::create("moguruDialog.png");
@@ -68,9 +80,15 @@ bool Dialog::shesay(std::string name,int count)
 	switch (whose)
 	{
 	case '0'://moca
-		if (count != 0) { mocaDialog->runAction(FadeTo::create(1.0f, 255)); }
+		if (count != 0) {
+			mocaDialog->runAction(FadeTo::create(1.0f, 255)); 
+			dmoca->runAction(FadeTo::create(1.0f, 255));
+		}
 		else
 		{
+			dmoca->setOpacity(255);
+			//if (moguruOn)dmoguru->setOpacity(200);
+			//if(fyeOn)dfye->setOpacity(200);
 			mocaDialog->setOpacity(255);
 			moguruDialog->setOpacity(0);
 			fyeDialog->setOpacity(0);
@@ -81,6 +99,9 @@ bool Dialog::shesay(std::string name,int count)
 		if (count != 0) {moguruDialog->runAction(FadeTo::create(1.0f, 255));}
 		else
 		{
+			//dmoguru->setOpacity(255);
+			//if (mocaOn)dmoca->setOpacity(200);
+			//if (fyeOn)dfye->setOpacity(200);
 			mocaDialog->setOpacity(0);
 			moguruDialog->setOpacity(255);
 			fyeDialog->setOpacity(0);
@@ -91,6 +112,9 @@ bool Dialog::shesay(std::string name,int count)
 		if (count != 0) { fyeDialog->runAction(FadeTo::create(1.0f, 255)); }
 		else
 		{
+			//dfye->setOpacity(255);
+			//if (mocaOn)dmoca->setOpacity(200);
+			//if (moguruOn)dmoguru->setOpacity(200);
 			mocaDialog->setOpacity(0);
 			moguruDialog->setOpacity(0);
 			fyeDialog->setOpacity(255);
@@ -116,7 +140,13 @@ void Dialog::next()
 		mocaDialog->setOpacity(0);
 		moguruDialog->setOpacity(0);
 		fyeDialog->setOpacity(0);
+		//dmoguru->setOpacity(0);
+		dmoca->setOpacity(0);
+		//dfye->setOpacity(0);
 		text->removeFromParentAndCleanup(1);
 		showing = 0;
+		mocaOn = 0;
+		moguruOn = 0;
+		fyeOn;
 	}
 }
