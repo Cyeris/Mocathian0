@@ -2,13 +2,15 @@
 #include "cocos2d.h"
 #include "option.h"
 #include "MenuLayer.h"
-
 #include <iostream>
+#define VB visibleSize
 float tTime = 0;
+extern float getRandom();
 bool GameLayer::init()
 {
+	tTime = 0;
 	vector<Sprite*> danmaku1;
-
+	lastGhost = 0;
 	/*auto diabox = Sprite::create("mocaDialog.png");
 	diabox->setPosition(origin.x, origin.y);
 	this->addChild(diabox, 3);*/
@@ -23,17 +25,33 @@ bool GameLayer::init()
 	float initx = UserDefault::getInstance()->getFloatForKey("x");
 	float inity = UserDefault::getInstance()->getFloatForKey("y");
 	_moca->setPosition(initx, inity);
-
 	_moca->enableFly();
 	this->addChild(_moca, 1);
+	/////////test
+	//auto circle = Sprite::create("tama1.png");
+	//circle->setPosition(400, 700);
+	//this->addChild(circle, 1);
+
+	auto fer = Fairy1::create();
+	fer->setPosition(500, 700);
+	this->addChild(fer, 1);
+	fairy1.pushBack(fer);
 
 	/*添加Moguru*/
 	_moguru = Moguru::create();
 	_moguru->setPosition(715, 2544);
 	this->addChild(_moguru, 1);
+	if (inity > 2544)_moguru->isparty = 1;
 	/*follow层*/
 	followCamera = Layer::create();
+	followCamera->setCascadeOpacityEnabled(true);
 	this->addChild(followCamera, 1);
+
+	///////////////////////////
+	hintL = Layer::create();
+	hintL->setCascadeOpacityEnabled(true);
+	hintL->setOpacity(0);
+	followCamera->addChild(hintL, 2);
 
 	/*高度条*/
 	heightBar = Slider::create();
@@ -50,7 +68,7 @@ bool GameLayer::init()
 	//eventMeetMoguru();
 	/*菜单*/
 	menuL = MenuLayer::create();
-	this->addChild(menuL, 2);
+	this->addChild(menuL, 3);
 
 	/*每帧更新*/
 	this->scheduleUpdate();
@@ -61,27 +79,78 @@ bool GameLayer::init()
 	listener->onKeyReleased = CC_CALLBACK_2(GameLayer::onKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 	
+	//showHint();
 	return true;
 }
 void GameLayer::update(float delta)
 {
-	/*std::string test = "你好";
-	std::cout << test;*/
 	tTime += delta;
 	//log("%f", tTime);
+	log("%f", getRandom());
+
+	
+
 	_moca->update(delta);
 	//tilePosition(_moca->getPosition());
 	checkForAndResolveCollisions(_moca);
+	mocapos0.x = _moca->getPosition().x;
+	mocapos0.y = _moca->getPosition().y+0.5*_moca->getBox().size.height;
 	setViewPoint();
-	//heightBar->setPosition(Vec2(camera->getPosition().x - 0.48*visibleSize.width, camera->getPosition().y - 0.32*visibleSize.height));
 	heightBar->setPercent(100*_moca->getPosition().y / 7680);
 	menuL->setPosition(Vec2(camera->getPosition().x, camera->getPosition().y + 1.5*visibleSize.height));
 	followCamera->setPosition(camera->getPosition());
-	//log("%f %f", _moca->getPosition().x, _moca->getPosition().y);
 
+	Vec2 cp = camera->getPosition();
+	
+
+	//if (ifHurt(Vec2(400, 700),8))
+	//{
+	//	log("c");
+	//}
+	if (tTime>1)
+	{
+		for (auto iter = fairy1.begin(); iter != fairy1.end();) {
+			(*iter)->update(delta);
+			iter++;
+		}
+	}
+	
+	
+
+
+	//log("%f %f", _moca->getPosition().x, _moca->getPosition().y);
 	if (!_moguru->isparty&&_moca->jumpCount==0&&_moca->getPosition().y>=2544)
 	{
 		eventMeetMoguru();
+	}
+	if (_moca->getPosition().y>3000)
+	{
+		randomGhost();
+		for (auto iter = ghosts.begin(); iter != ghosts.end();)
+		{
+			(*iter)->update(_moca, delta);
+			Vec2 gp = (*iter)->getPosition();
+			if (gp.x > (cp.x + 0.5*VB.width) || gp.x < (cp.x - 0.5*VB.width) || gp.y<(cp.y - 0.5*VB.height) || gp.y>(cp.y + 0.5*VB.height))
+			{
+				this->removeChild((*iter), true);
+				iter = ghosts.erase(iter);
+				log("%d", ghosts.size());
+			}
+			else {
+				if (ifHurt(gp,25))
+				{
+					log("g");
+					this->removeChild((*iter), true);
+					iter = ghosts.erase(iter);
+					log("%d", ghosts.size());
+				}
+				else
+				{
+					++iter;
+				}
+			}
+		}
+		
 	}
 }
 void GameLayer::setViewPoint()
@@ -103,11 +172,7 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		}
 		else
 		{
-			
-			/*if (_moca->lefting)
-			{
-				_moca->lefting = 0;
-			}*/
+			_moca->faceLeft = 0;
 			_moca->setScaleX(1);
 			_moca->righting = 1;
 		}
@@ -120,6 +185,7 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		else
 		{
 			//if (_moca->righting) _moca->righting = 0;
+			_moca->faceLeft = 1;
 			_moca->setScaleX(-1);
 			_moca->lefting=1;
 		}
@@ -131,6 +197,10 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		if (_moca->flyMode) _moca->isS = 1;
 		break;
 	case EventKeyboard::KeyCode::KEY_Z:
+		if (hintOn)
+		{
+			disHint();
+		}
 		if (dia->showing)
 		{
 			if (dia->turned==dia->turns)
@@ -167,18 +237,6 @@ void GameLayer::onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event) {
 		{
 			menuL->showMenu(0,this, camera->getPosition());
 		}
-
-		//renderTexture = RenderTexture::create(visibleSize.width, visibleSize.height);
-		//
-		////遍历当前类的所有子节点信息，画入renderTexture中。  
-		////这里类似截图。  
-		//renderTexture->begin();
-		//this->getParent()->visit();
-		//renderTexture->end();
-
-		//camera->setPosition(Vec2(visibleSize.width *0.5, visibleSize.height *0.5));
-		////将游戏界面暂停，压入场景堆栈。并切换到GamePause界面  
-		//CCDirector::sharedDirector()->pushScene(MenuLayer::createScene(renderTexture));
 		
 		break;
 	default:
@@ -278,7 +336,7 @@ void GameLayer::checkForAndResolveCollisions(Moca* player)
 			player->speed.x = 0;
 		}
 	}
-	player->setPosition(player->iPos); //7 把主角位置设定到它期望去的地方  
+	player->setPosition(player->iPos); 
 	if (_moguru->isparty)
 	{
 		Vec2 moguPos = player->getPosition();
@@ -297,6 +355,37 @@ void GameLayer::checkForAndResolveCollisions(Moca* player)
 	}
 }
 
+void GameLayer::showHint(int i)
+{
+	hintOn = 1;
+	auto background = Sprite::create("HintBG.png");
+	//background->setOpacity(0);
+	hintL->runAction(FadeTo::create(2.0f, 255));
+	hintL->addChild(background);
+	this->unscheduleUpdate();
+}
+
+void GameLayer::disHint()
+{
+	hintOn = 0;
+	hintL->runAction(FadeTo::create(0.4f, 0));
+	hintL->removeAllChildren();
+	this->scheduleUpdate();
+	log("run DIS HINT");
+}
+
+bool GameLayer::ifHurt(Vec2 pos, float r)
+{
+	if (_moca->getDt(pos) < (r + 0.5*_moca->getBox().size.width-4)) {
+		//log("hurt");
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 bool GameLayer::eventMeetMoguru()
 {
 	unscheduleUpdate();
@@ -304,11 +393,36 @@ bool GameLayer::eventMeetMoguru()
 	_moguru->isparty = 1;
 	return true;
 }
+
 void GameLayer::randomGhost() {
-
+	if (ghosts.size()<5&&(tTime-lastGhost)>3)
+	{
+		lastGhost = tTime;
+		srand((unsigned)time(NULL));
+		if ((rand() % 100 + 1)>60)
+		{
+			ghosts.pushBack(Ghost::create());
+			srand((unsigned)time(NULL));
+			ghosts.back()->setPosition(_moca->getPosition().x+(rand() % 100 - 49)*visibleSize.width / 200, _moca->getPosition().y + (rand() % 100 + 1)*visibleSize.height / 200);
+			this->addChild(ghosts.back());
+			log("%d", ghosts.size());
+		}
+	}
 }
-void GameLayer::ghostAtk() {
-
+void GameLayer::randomFairy() {
+	if (fairy1.size()<5 && (tTime - lastFairy1)>2)
+	{
+		lastFairy1 = tTime;
+		srand((unsigned)time(NULL));
+		if ((rand() % 100 + 1)>60)
+		{
+			ghosts.pushBack(Ghost::create());
+			srand((unsigned)time(NULL));
+			ghosts.back()->setPosition(_moca->getPosition().x + (rand() % 100 - 49)*visibleSize.width / 200, _moca->getPosition().y + (rand() % 100 + 1)*visibleSize.height / 200);
+			this->addChild(ghosts.back());
+			log("%d", ghosts.size());
+		}
+	}
 }
 //Rect GameLayer::intersectsRect(Rect rectA, Rect rectB)
 //

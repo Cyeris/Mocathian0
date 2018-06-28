@@ -5,8 +5,6 @@
 #include <queue>
 USING_NS_CC;
 using namespace std;
-
-
 class GameLayer;
 class Moguru;
 class Moca :public Sprite
@@ -19,6 +17,7 @@ public:
 	Rect getBox();
 	void enableFly();
 	void update(float dt);
+	float getDt(Vec2);
 
 	//Vec2 TileCoordForPosition(GameLayer* g, Vec2 position);	//把Moca的x坐标/图块的宽，y坐标/图块的高算出现在Moca处于tile的第几行第几列
 	//void Jump();	//跳跃方法
@@ -58,13 +57,43 @@ public:
 class Ghost :public Sprite {
 public:
 	Sprite * ghost;
+	Vec2 speed;
+
+	const int g = 100;
 
 	CREATE_FUNC(Ghost);
 	virtual bool init();
 	void update(Moca* moca,float dt);
 	//Rect getBox();
-	std::queue<Vec2> actlog;
-	bool isparty;
+};
+class Bullet :public Sprite {
+public:
+	Bullet();
+	Bullet(float velo,float angle);
+	~Bullet();
+	static Bullet* createWithSpeed(float velo, float angle);
+	Sprite* blt;
+	Vec2 speed;
+	float angle;
+};
+class Fairy1 :public Sprite {
+public:
+	Sprite * fairy1;
+	//Vec2 speed;
+	//Vector<Bullet> tama;
+	Vector<Bullet*> tama;
+
+
+	float deltaT;
+
+	const float tamaspeed = 600;
+	void update(float dt);
+
+
+	CREATE_FUNC(Fairy1);
+	virtual bool init();
+
+	//void update(Moca* moca, float dt);
 
 };
 

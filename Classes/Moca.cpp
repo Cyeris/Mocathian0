@@ -1,12 +1,19 @@
 #include "Moca.h"
+#include <cmath>
 extern float tTime;
+float getRandom() {
+	random_device rd;
+	float rdx = (rd() % 100 + 1);
+	//log("%f", rdx/100);
+	return rdx/100;
+}
 bool Moca::init()
 {
 	aMoca = Sprite::create("Moca.png");
 	aMoca->setScale(0.3f);
 	aMoca->setAnchorPoint(Vec2(0.5, 0));
 	this->addChild(aMoca);
-	flySpeed = 300;
+	flySpeed = 400;
 	runSpeed = 500;
 	runAcce = 1000;
 	return true;
@@ -102,14 +109,21 @@ void Moca::update(float dt)
 	
 }
 
+float Moca::getDt(Vec2 pos)
+{
+	float deltaY = 0.5*aMoca->boundingBox().size.height;
+	float x2 = (getPosition().x - pos.x)*(getPosition().x - pos.x);
+	float y2 = (getPosition().y + deltaY - pos.y)*(getPosition().y + deltaY - pos.y);
+	//log("%f", pow(x2 + y2, 0.5));
+	return pow(x2 + y2, 0.5);
+}
+
 bool Moguru::init()
 {
 	isparty = 0;
 	moguru = Sprite::create("image/moguru/moguru0.png");
 	moguru->setAnchorPoint(Vec2(0.5, 0));
-	this->addChild(moguru);
-
-
+	//this->addChild(moguru);
 
 	return true;
 }
@@ -117,6 +131,8 @@ bool Ghost::init()
 {
 	ghost = Sprite::create("Ghost.png");
 	ghost->setScale(2.0f);
+	ghost->setOpacity(10);
+	ghost->runAction(FadeTo::create(1.0f, 240));
 	this->addChild(ghost);
 
 	return true;
@@ -126,12 +142,119 @@ void Ghost::update(Moca * moca,float dt)
 {
 	if (moca->faceLeft)
 	{
-		if (this->getPosition().x>moca->getPosition().x)
+		this->setScaleX(-1);
+		if (this->getPosition().x>=moca->getPosition().x)
 		{
-
+			speed.x = moca->speed.x - 40;
+			if (this->getPosition().y<moca->getPosition().y)
+			{
+				speed.y = 200;
+			}
+			else
+			{
+				speed.y = -200;
+			}
+		}
+		else
+		{
+			speed = Vec2(0, 0);
 		}
 	}
+	else
+	{
+		this->setScaleX(1);
+		if (this->getPosition().x<=moca->getPosition().x)
+		{
+			speed.x = moca->speed.x + 40;
+			if (this->getPosition().y<moca->getPosition().y)
+			{
+				speed.y = 200;
+			}
+			else
+			{
+				speed.y = -200;
+			}
+		}
+		else
+		{
+			speed = Vec2(0, 0);
+		}
+	}
+	this->setPosition(this->getPosition()+speed*dt);
+}
+void Fairy1::update(float dt)
+{
+	deltaT += dt;
+	if (deltaT>=5*dt)
+	{
+		if (tama.size()<1000)
+		{
+			auto b = Bullet::createWithSpeed(tamaspeed, 6.28*getRandom());
+	
+			tama.pushBack(b);
+			tama.back()->setPosition(fairy1->getPosition());
+			fairy1->addChild(tama.back());
+			//log("%d", tama.size());
+		}
+		deltaT = 0;
+	}
+	for (auto iter = tama.begin(); iter != tama.end();) {
+		(*iter)->setPosition((*iter)->getPosition() + (*iter)->speed*dt);
+		iter++;
+	}
+	//for (auto iter = ghosts.begin(); iter != ghosts.end();)
+}
+
+bool Fairy1::init()
+{
+	deltaT = 0;
+	fairy1 = Sprite::create("enemy1.png");
+	this->addChild(fairy1);
 
 
+	return true;
+}
+
+Bullet::Bullet()
+{
+}
+
+Bullet::Bullet(float velo, float angle)
+{
+	speed.x = velo * cos(angle);
+	speed.y = velo * sin(angle);
+	this->angle = angle;
+	blt = Sprite::create("tama1.png");
+	this->addChild(blt);
+}
+
+Bullet::~Bullet()
+{
+	this->removeAllChildren();
+	//log("~B");
+}
+
+Bullet * Bullet::createWithSpeed(float velo, float angle)
+{
+	//实例化一个新的对象
+
+	Bullet * pRet = new Bullet(velo, angle);
+
+	//初始化OK后自动释放内存
+
+	if (pRet && pRet->init()) {
+
+		pRet->autorelease();
+
+	}
+	else {
+
+		//否则就安全删除
+
+		CC_SAFE_DELETE(pRet);
+
+	}
+
+	return pRet;
 }
 

@@ -15,7 +15,8 @@ class Moca;
 class Moguru;
 class MenuLayer;
 class Dialog;
-
+class Ghost;
+class Fairy1;
 class GameLayer : public cocos2d::Layer
 {
 public:
@@ -27,18 +28,29 @@ public:
 	void onKeyPressed(EventKeyboard::KeyCode keyCode, Event * event);
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event * event);
 	void checkForAndResolveCollisions(Moca* player);
+	void showHint(int i = 0);
+	void disHint();
+	bool ifHurt(Vec2, float);
 	CREATE_FUNC(GameLayer);
 
 	bool eventMeetMoguru();
 
 	void randomGhost();
 
+	void randomFairy();
+
 	void ghostAtk();
 
 
-
+	bool hintOn;
 	bool flagMeetMoguru;
+	bool hint[4];
 
+	float lastGhost;
+	float lastFairy1;
+
+
+	Vec2 mocapos0;
 
 	Vec2 tilePosition(Vec2 position);
 	Rect getTileRect(Vec2 tilePos);
@@ -49,8 +61,10 @@ public:
 	Slider* heightBar;
 	Camera* camera;
 	Moguru* _moguru;
+	Layer* hintL;
 	Layer* followCamera;
-	
+	Vector<Ghost*> ghosts;
+	Vector<Fairy1*> fairy1;
 	//CCPoint TileCoordForPosition(CCPoint position);
 	//Rect intersectsRect(Rect rectA, Rect rectB);
 	//Rect tileRect(cocos2d::CCPoint tileCoords);
